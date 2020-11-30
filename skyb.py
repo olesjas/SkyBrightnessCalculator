@@ -550,7 +550,7 @@ def main(site, date, grid_step, F107, k_V):
     X_Zm = optical_path(alt_m)
 
     # create a zod. brightness array and corresponding ecl. coord arrays
-    data1234, lamb_deg_rel, beta_rad = read_zod_file("./zod_br_formated.txt")
+    data1234, lamb_deg_rel, beta_rad = read_zod_file("./zod_br.txt")
 
     # Transform altitude values into airmasses
     X_Z = optical_path(mesh_alt)
