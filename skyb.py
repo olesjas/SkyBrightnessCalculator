@@ -326,7 +326,9 @@ def eqToHoriz(ra_rad, decl_rad, lst_rad, fi_rad):
 
 def zodiac_grid(latitude, az, alt, lamb_sun, LST_rad, lamb_deg_rel, beta_rad, data1234):
     """
-    A function that transforms the coordinates of full sky zod. brightness distribution array from relative ecliptic coordinate into horizontal coordinates,. A linear interpolation is then done on the resulting array in order to make it evenly spaced to avoid edge effects.
+    A function that transforms the coordinates of full sky zod. brightness distribution array from
+    relative ecliptic coordinate into horizontal coordinates. A linear interpolation is then done 
+    on the resulting array in order to make it evenly spaced to avoid edge effects.
     
     Inputs:
     ------
@@ -491,9 +493,10 @@ class Plotter:
         self.az = mesh_az
         self.alt = mesh_alt
 
-    def save(self, date, arr, path, fname):
+    def save(self, date, moon_illum, arr, path, fname):
         plot_polar_contour(arr, self.az, self.alt)
         plt.figtext(0.02,0.95, date, ha='left')
+        plt.figtext(0.02,0.92, 'Moon illum. ={0:.0f}%'.format(100*moon_illum), ha='left')
         plt.savefig(os.path.join(path, fname))
         plt.close()
 
@@ -502,6 +505,7 @@ def main(site, date, grid_step, F107, k_V):
     latitude = site.location.lat.rad
     time_range = create_time_range(date, site)
     phase = moon_phase_angle(time_range[0], site)
+    moon_illum = astroplan.moon_illumination(Time(time_range[0]), ephemeris=None)
     alt_m, az_m = moon_altaz_coord(time_range, site)
     lamb_sun = sun_ecliptic_long(time_range)
 
@@ -568,7 +572,7 @@ def main(site, date, grid_step, F107, k_V):
             # summary sky brightness due to Moon, airglow and zod.light, airmass sc.
             Bfinal_V = nL_to_Vmag(Bmoon + B0_Za + B0_Zz)
             # make a plot (with object)of Moon brightness distribution
-            plotter.save(plotting_date, Bmoon_V, Bmoon_path, f"Bmoon_V_{n+100}.png") 
+            plotter.save(plotting_date, moon_illum, Bmoon_V, Bmoon_path, f"Bmoon_V_{n+100}.png") 
         else:
             Bfinal_V = B0Z_V
             plt.figtext(0.02,0.95, plotting_date, ha='left')
@@ -577,13 +581,13 @@ def main(site, date, grid_step, F107, k_V):
             plt.close()
 
         # make a plot of final sky brightness, with object
-        plotter.save(plotting_date, Bfinal_V, Bfinal_path, f'Bfinal_V_{n+100}.png')
+        plotter.save(plotting_date, moon_illum, Bfinal_V, Bfinal_path, f'Bfinal_V_{n+100}.png')
 
         # make a plot of zodiacal light distribution with obj.
-        plotter.save(plotting_date, B0Z_Vz, Bzod_path, f'B0Z_Vz_{n+100}.png')
+        plotter.save(plotting_date, moon_illum, B0Z_Vz, Bzod_path, f'B0Z_Vz_{n+100}.png')
 
     # make a plot of sky brightness due to airglow (only one)
-    plotter.save(plotting_date, B0Z_Va, Bairglow_path, 'B0Z_Va.png')
+    plotter.save(plotting_date, moon_illum, B0Z_Va, Bairglow_path, 'B0Z_Va.png')
 
 if __name__ == '__main__':
     args = parse_arguments()
